@@ -40,5 +40,5 @@ def process_ajax():
         return jsonify({'message': 'Invalid request method'})
     
 if __name__ == "__main__":
-    app.run(host="133.68.17.14",port=80)
+    app.run(host="0.0.0.0",port=80)
 
