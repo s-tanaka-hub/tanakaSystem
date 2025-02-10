@@ -6,6 +6,7 @@ import networkx as nx
 
 #クリックされた点を含む最小の矩形領域
 def rectangleArea(points):
+    print("クリックされた点を含む最小の矩形")
     min_lat = float('inf')
     max_lat = float('-inf')
     min_lng = float('inf')
