@@ -47,9 +47,11 @@ def connectGraph(G):
 
 #最短経路
 def shortestPath(p1, p2, link, length):
+    print("最短経路_pathSearch.py")
     #最近傍ノードを取得
     p1 = nearestNode(p1, link)
     p2 = nearestNode(p2, link)
+    print("p1:", p1 , ",p2:" , p2) #中身知る用
 
     #networkxのグラフを生成
     edges = []
@@ -57,16 +59,92 @@ def shortestPath(p1, p2, link, length):
         edges.append((str(link[i][0]), str(link[i][1]), length[i]))
     G = nx.Graph()
     G.add_weighted_edges_from(edges)
+    print("G:", G) #中身知る用
+    #print("list(G.nodes):",list(G.nodes)) #中身知る用
     connectGraph(G)
 
     #最短経路探索
     path_str = nx.dijkstra_path(G, str(p1), str(p2))
-
+    #print("path_str:", path_str) #中身知る用
+   
+    #最短経路の経路長
+    length = 0
+    length = nx.dijkstra_path_length(G, str(p1), str(p2) )
+    print("length(最短経路):", length, ",type(length):", type(length)) #中身知る用
+       
     #結果をstrから戻して返却
     path = []
     for line in path_str:
         path.append([float(x) for x in line.strip('[]').split(',')])
-    return path
+    return path, length
+    #return path
+
+#最少右左折経路
+#tanaka作
+def minimumStrokesPath(p1, p2, link, length):
+    print("最少右左折経路_pathSearch.py")
+    #最近傍ノードを取得
+    p1 = nearestNode(p1, link)
+    p2 = nearestNode(p2, link)
+    print("p1:", p1 , ",p2:" , p2) #中身知る用
+
+    #networkxのグラフを生成
+    edges = []
+    for i in range(len(link)):
+        edges.append((str(link[i][0]), str(link[i][1]), length[i]))
+    G = nx.Graph()
+    G.add_weighted_edges_from(edges)
+    print("G:", G) #中身知る用
+    #print("list(G.nodes):",list(G.nodes)) #中身知る用
+    connectGraph(G)
+
+    #最短経路探索
+    path_str = nx.dijkstra_path(G, str(p1), str(p2))
+    #print("path_str:", path_str) #中身知る用
+   
+    #最短経路の経路長
+    length = 0
+    length = nx.dijkstra_path_length(G, str(p1), str(p2) )
+    print("length(最短経路):", length, ",type(length):", type(length)) #中身知る用
+       
+    #結果をstrから戻して返却
+    path = []
+    for line in path_str:
+        path.append([float(x) for x in line.strip('[]').split(',')])
+    return path, length
+    #return path
+
+#最少右左折経路
+# #GPT
+from collections import deque
+def minStrokesPath(start_node, goal_node, node2stroke, stroke2node, intersect_stroke_dict):
+    # 始点・終点が属するストロークID
+    start_stroke = node2stroke[start_node]
+    goal_stroke  = node2stroke[goal_node]
+
+    # 幅優先探索状態（[訪問済みストローク集合, ストローク経路]）
+    queue = deque()
+    queue.append( ([start_stroke], [start_stroke]) )  # 最初は始点ストロークのみ
+    visited_sets = set()  # frozensetで判定
+
+    while queue:
+        visited_strokes, stroke_path = queue.popleft()
+        current_stroke = stroke_path[-1]
+        
+        # 終点ノードを含むストロークが訪問済みなら成功
+        if goal_stroke in visited_strokes:
+            return stroke_path  # 経路（ストローク単位）
+
+        # 現在のストロークから隣のストロークへ
+        for next_stroke in intersect_stroke_dict.get(current_stroke, []):
+            if next_stroke not in visited_strokes:
+                new_visited = visited_strokes + [next_stroke]
+                state = frozenset(new_visited)
+                if state not in visited_sets:
+                    visited_sets.add(state)
+                    queue.append( (new_visited, stroke_path + [next_stroke]) )
+
+    return None  # 失敗（到達不可）
 
 #最小全域木
 def MST(link, length):
@@ -113,6 +191,7 @@ def steiner(points, link, length):
 
 #巡回経路
 def traveling(points, link, length):
+    print("巡回経路_pathSearch.py")
     #通るポイント(都市)
     positions = []
     for p in points:
@@ -146,4 +225,6 @@ def traveling(points, link, length):
         length += nx.dijkstra_path_length(G_temp, tsp[i], tsp[i+1])
         for line in path_str:
             paths.append([float(x) for x in line.strip('[]').split(',')])
+    
+    print("length(巡回経路):", length, ",type(length):", type(length)) #中身知る用
     return paths, length

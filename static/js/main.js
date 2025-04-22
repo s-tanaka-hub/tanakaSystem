@@ -30,6 +30,7 @@ var markerType = "location";
 var startMarkerFlag = false;
 var endMarkerFlag = false;
 var button1Active = false;
+var button2Active = false;
 
 // マウスクリックで緯度経度の取得とマーカー設置
 function onMapClick(e) {
@@ -85,8 +86,9 @@ function onEndMarkerClick(e) {
   endMarkerFlag = false;
 }
 
+/*
 const button1Text = document.getElementById('button1Text');
-// 巡回経路探索ボタンのクリックイベント
+// 経路探索ボタンのクリックイベント
 $('#btn_TSP').click(function() {
   button1Active = !button1Active; // 状態を反転させる
 
@@ -119,6 +121,120 @@ $('#btn_TSP').click(function() {
       map.removeLayer(polyline); // polyline を地図から削除
     }
     $('#button1Text').addClass('hidden');
+  }
+});
+*/
+
+const button1Text = document.getElementById('button1Text');
+// 経路探索ボタンのクリックイベント のコピー
+$('#btn_TSP').click(function() {
+  button1Active = !button1Active; // 状態を反転させる
+
+  if (button1Active) {
+    $(this).addClass('active'); // ボタンが押されている表示にする
+    var requestData = {
+            points:points,
+            startPoint:startPoint,
+            endPoint:endPoint
+        };
+    $.ajax({
+        url: '/process_ajax',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(requestData),
+        success: function(response) {
+            var path = response.path;
+            var len = response.len;
+            // 経路を表示
+            polyline = L.polyline(path, { color: 'blue' })
+            polyline.addTo(map);
+            var len_round = Math.round(len * Math.pow(10, 3) ) / Math.pow(10, 3);
+            button1Text.textContent = '経路長：'+len_round+'km';
+            $('#button1Text').removeClass('hidden');
+        }
+    });
+  } else {
+    $(this).removeClass('active'); // ボタンが押されていない表示にする
+    if (polyline) {
+      map.removeLayer(polyline); // polyline を地図から削除
+    }
+    $('#button1Text').addClass('hidden');
+  }
+});
+
+const button2Text = document.getElementById('button2Text');
+// 最短経路探索ボタンのクリックイベント
+//print("ボタン2_main.js") →JSでのターミナルへのコメント出力の方法が分からんかった
+$('#btn_shortestPath').click(function() {
+  button2Active = !button2Active; // 状態を反転させる
+
+  if (button2Active) {
+    $(this).addClass('active'); // ボタンが押されている表示にする
+    var requestData = {
+            points:points,
+            startPoint:startPoint,
+            endPoint:endPoint
+        };
+    $.ajax({
+        url: '/shortestPath',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(requestData),
+        success: function(response) {
+            var path = response.path;
+            var len = response.len;
+            // 経路を表示
+            polyline = L.polyline(path, { color: 'red' })
+            polyline.addTo(map);
+            var len_round = Math.round(len * Math.pow(10, 3) ) / Math.pow(10, 3);
+            button2Text.textContent = '経路長：'+len_round+'km';
+            $('#button2Text').removeClass('hidden');
+        }
+    });
+  } else {
+    $(this).removeClass('active'); // ボタンが押されていない表示にする
+    if (polyline) {
+      map.removeLayer(polyline); // polyline を地図から削除
+    }
+    $('#button2Text').addClass('hidden');
+  }
+});
+
+const button3Text = document.getElementById('button3Text');
+// 最少右左折経路探索ボタンのクリックイベント
+//print("ボタン3_main.js") →JSでのターミナルへのコメント出力の方法が分からんかった
+$('#btn_minimumStrokesPath').click(function() {
+  button3Active = !button3Active; // 状態を反転させる
+
+  if (button3Active) {
+    $(this).addClass('active'); // ボタンが押されている表示にする
+    var requestData = {
+            points:points,
+            startPoint:startPoint,
+            endPoint:endPoint
+        };
+    $.ajax({
+        url: '/minimumStrokesPath',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(requestData),
+        success: function(response) {
+            var path = response.path;
+            var len = response.len;
+            // 経路を表示
+            polyline = L.polyline(path, { color: 'red' })
+            polyline.addTo(map);
+            var len_round = Math.round(len * Math.pow(10, 3) ) / Math.pow(10, 3);
+            button3Text.textContent = '経路長：'+len_round+'km';
+            $('#button3Text').removeClass('hidden');
+        }
+    });
+  } else {
+    $(this).removeClass('active'); // ボタンが押されていない表示にする
+    if (polyline) {
+      map.removeLayer(polyline); // polyline を地図から削除
+    }
+    $('#button3Text').addClass('hidden');
   }
 });
 
