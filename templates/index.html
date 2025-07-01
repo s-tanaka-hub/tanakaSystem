@@ -8,19 +8,13 @@
 <body>
   <div id="map"></div>
   <div class="btn-flex">
-    <div class="btn mamListBox">
-      <a href="javascript:void(0)">
-        <div>経由地点指定</div>
-      </a>
-      <select size="3" data-role="none">
-        <option value="location">経由地点指定</option>
-        <option value="start">出発地点指定</option>
-        <option value="end">到着地点指定</option>
-      </select>
+    <div class="btn-container">
+      <button id ="btn_LinkCheck" class="btn route-display">取得リンク確認用</button>
+      <p id="button5Text" class="lengthText hidden"></p>
     </div>
     <div class="btn-container">
-      <button id ="btn_TSP" class="btn route-display">経路表示</button>
-      <p id="button1Text" class="lengthText hidden"></p>
+      <button id ="btn_nMinStrokeShortestPath" class="btn route-display">第n道なり優先最短経路</button>
+      <p id="button4Text" class="lengthText hidden"></p>
     </div>
     <div class="btn-container">
       <button id ="btn_minimumStrokesPath" class="btn route-display">最少右左折経路</button>
@@ -29,6 +23,21 @@
     <div class="btn-container">
       <button id ="btn_shortestPath" class="btn route-display">最短経路表示</button>
       <p id="button2Text" class="lengthText hidden"></p>
+    </div>
+    <div class="btn-container">
+      <button id ="btn_dictionary" class="btn route-display">データ取得</button>
+      <p id="button1Text" class="lengthText hidden"></p>
+    </div>
+    <div class="btn mamListBox">
+      <a href="javascript:void(0)">
+        <div>データ取得範囲</div>
+      </a>
+      <select size="3" data-role="none">
+        <option value="getData">データ取得範囲</option>
+        <option value="location">経路点指定</option>
+        <option value="start">出発地点指定(不使用)</option>
+        <option value="end">到着地点指定(不使用)</option>
+      </select>
     </div>
   </div>
 

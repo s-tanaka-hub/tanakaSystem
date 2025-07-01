@@ -24,17 +24,39 @@ const redIcon = L.icon({
 });
 
 var points = [];
+var getDataPoints = [];
 var startPoint = [];
 var endPoint = [];
-var markerType = "location";
+var markerType = "getData";
 var startMarkerFlag = false;
 var endMarkerFlag = false;
 var button1Active = false;
 var button2Active = false;
+var button3Active = false;
+var button4Active = false;
 
 // マウスクリックで緯度経度の取得とマーカー設置
 function onMapClick(e) {
   switch(markerType) {
+    case "getData":
+      if (getDataPoints.length >= 2) {
+        break;  // 2個までしか追加できない
+      }
+      L.marker(e.latlng, { icon: redIcon })
+        .on('click', onGetDataMarkerClick)
+        .addTo(map)
+        .bindPopup('データ取得範囲', {autoClose:false})
+        .openPopup();
+      getDataPoints.push([e.latlng.lat, e.latlng.lng]);
+      break;
+    case "location":
+      if (points.length >= 2) {
+        break;
+      }
+      L.marker(e.latlng).on('click', onMarkerClick).addTo(map);
+      points.push([e.latlng.lat, e.latlng.lng]);
+      break;
+    //以下２つは使ってない↓
     case "start":
       if(startMarkerFlag) {
         break;
@@ -43,10 +65,6 @@ function onMapClick(e) {
                       .bindPopup('出発地点',{autoClose:false}).openPopup();
       startPoint = [e.latlng.lat, e.latlng.lng];
       startMarkerFlag = true;
-      break;
-    case "location":
-      L.marker(e.latlng).on('click', onMarkerClick).addTo(map);
-      points.push([e.latlng.lat, e.latlng.lng]);
       break;
     case "end":
       if(endMarkerFlag) {
@@ -71,6 +89,13 @@ function onMarkerClick(e) {
   if (index > -1){
     points.splice(index, 1)
   }
+  map.removeLayer(e.target);
+}
+
+function onGetDataMarkerClick(e) {
+  getDataPoints = getDataPoints.filter(
+    pt => !(pt[0] === e.target.getLatLng().lat && pt[1] === e.target.getLatLng().lng)
+  );
   map.removeLayer(e.target);
 }
 
@@ -127,18 +152,17 @@ $('#btn_TSP').click(function() {
 
 const button1Text = document.getElementById('button1Text');
 // 経路探索ボタンのクリックイベント のコピー
-$('#btn_TSP').click(function() {
+$('#btn_dictionary').click(function() {
   button1Active = !button1Active; // 状態を反転させる
 
   if (button1Active) {
     $(this).addClass('active'); // ボタンが押されている表示にする
     var requestData = {
-            points:points,
-            startPoint:startPoint,
-            endPoint:endPoint
+            // points:points,
+            getDataPoints:getDataPoints
         };
     $.ajax({
-        url: '/process_ajax',
+        url: '/dictionary',
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(requestData),
@@ -146,18 +170,18 @@ $('#btn_TSP').click(function() {
             var path = response.path;
             var len = response.len;
             // 経路を表示
-            polyline = L.polyline(path, { color: 'blue' })
-            polyline.addTo(map);
-            var len_round = Math.round(len * Math.pow(10, 3) ) / Math.pow(10, 3);
-            button1Text.textContent = '経路長：'+len_round+'km';
+            // polyline = L.polyline(path, { color: 'blue' })
+            // polyline.addTo(map);
+            // var len_round = Math.round(len * Math.pow(10, 3) ) / Math.pow(10, 3);
+            button1Text.textContent = '辞書データ作成完了';
             $('#button1Text').removeClass('hidden');
         }
     });
   } else {
     $(this).removeClass('active'); // ボタンが押されていない表示にする
-    if (polyline) {
-      map.removeLayer(polyline); // polyline を地図から削除
-    }
+    // if (polyline) {
+    //   map.removeLayer(polyline); // polyline を地図から削除
+    // }
     $('#button1Text').addClass('hidden');
   }
 });
@@ -184,7 +208,7 @@ $('#btn_shortestPath').click(function() {
             var path = response.path;
             var len = response.len;
             // 経路を表示
-            polyline = L.polyline(path, { color: 'red' })
+            polyline = L.polyline(path, { color: 'yellow' })
             polyline.addTo(map);
             var len_round = Math.round(len * Math.pow(10, 3) ) / Math.pow(10, 3);
             button2Text.textContent = '経路長：'+len_round+'km';
@@ -235,6 +259,109 @@ $('#btn_minimumStrokesPath').click(function() {
       map.removeLayer(polyline); // polyline を地図から削除
     }
     $('#button3Text').addClass('hidden');
+  }
+});
+
+const button4Text = document.getElementById('button4Text');
+// 第n道なり優先最短経路探索ボタンのクリックイベント
+var polylines_nMinStroke = []; //LeafletのL.polylineで描画した線を後でまとめて消す時などのために配列に保存しておきます
+$('#btn_nMinStrokeShortestPath').click(function() {
+  button4Active = !button4Active; // 状態を反転させる
+  if (button4Active) {
+    $(this).addClass('active'); // ボタンが押されている表示にする
+    var requestData = {
+            points:points,
+            // getDataPoints:getDataPoints,
+            // startPoint:startPoint,
+            // endPoint:endPoint
+        };
+    $.ajax({
+        url: '/nMinStrokeShortestPath',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(requestData),
+        success: function(response) {
+          
+          var paths= response.paths;
+          console.log("paths:"+paths+", paths.length(要素の数):"+paths.length);
+          var colors = ['pink','blue','green','orange','brown','red','purple'];
+          var maxWeight = 15;
+          var minWeight = 3;
+          var step = 3;
+          for (var i = 0; i < paths.length; i++) {
+            console.log("i:"+i);
+            var weight = Math.max(maxWeight - i * step, minWeight);
+            var poly = L.polyline(paths[i], {
+                  color: colors[i % colors.length],
+                  weight: weight,
+                  // dashArray: i ? "10,10" : null  // 2本目以降は点線例
+            });
+            poly.addTo(map);
+            polylines_nMinStroke.push(poly);
+          
+          }
+          button4Text.textContent = '取得経路数:' + paths.length;
+          $('#button4Text').removeClass('hidden');
+
+          
+          // var path = response.path;
+          // console.log("path:"+path);
+          // // var n = response.n;
+          // polyline = L.polyline(path, { color: 'purple' })// 経路を表示
+          // polyline.addTo(map);
+        }
+
+    });
+  } else {
+    $(this).removeClass('active'); // ボタンが押されていない表示にする
+      polylines_nMinStroke.forEach(function(poly) { map.removeLayer(poly); });
+      polylines_nMinStroke = [];  
+      console.log("polylines_nMinStroke:"+polylines_nMinStroke);
+
+    // polylines_nMinStroke.forEach(function(poly) {
+      //   map.removeLayer(poly);
+      // });
+      // polylines_nMinStroke = [];
+    
+    // if (polyline) {
+    //   map.removeLayer(polyline); // polyline を地図から削除
+    // }
+    $('#button4Text').addClass('hidden');
+  }
+});
+
+const button5Text = document.getElementById('button5Text');
+// リンク(ストローク)確認用ボタンのクリックイベント
+$('#btn_LinkCheck').click(function() {
+  button5Active = !button5Active; // 状態を反転させる
+  if (button5Active) {
+    $(this).addClass('active'); // ボタンが押されている表示にする
+    var requestData = {
+            points:points,
+            getDataPoints:getDataPoints,
+            startPoint:startPoint,
+            endPoint:endPoint
+        };
+    $.ajax({
+        url: '/LinkCheck',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(requestData),
+        success: function(response) {
+            var path = response.path;
+            var n = response.n;
+            polyline = L.polyline(path, { color: 'green' })// 経路を表示
+            polyline.addTo(map);
+            button5Text.textContent = '範囲倍率：n='+n;
+            $('#button5Text').removeClass('hidden');
+        }
+    });
+  } else {
+    $(this).removeClass('active'); // ボタンが押されていない表示にする
+    if (polyline) {
+      map.removeLayer(polyline); // polyline を地図から削除
+    }
+    $('#button5Text').addClass('hidden');
   }
 });
 
