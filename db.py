@@ -168,7 +168,7 @@ def getRectangleRoadData(y1, x1, y2, x2, n = 1):
             id, link_ids, stroke_length, stroke_clazz, wkt = row
             stroke_id.append(int(id))
             link_ids_inStroke.append(link_ids)
-            print(f"stroke_id:{stroke_id} links:{link_ids} length:{stroke_length} clazz:{stroke_clazz} wkt:{wkt}")
+            # print(f"stroke_id:{stroke_id} links:{link_ids} length:{stroke_length} clazz:{stroke_clazz} wkt:{wkt}")
         # print("stroke_id:",stroke_id)
         # print("link_IDs:",link_IDs)
 

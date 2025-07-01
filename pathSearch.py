@@ -411,8 +411,8 @@ def nMinStrokeShortestPath(
     print("スタートノード:", start_node , ",ゴールノード:" , goal_node)
 
     frontiers  = NumberOfMinStrokes(p1, p2, link, node_to_linkids, linkid_to_strokeid, strokeid_to_intersections)
-    numberOfMinStrokes = len(frontiers) - 1
-    print(f"最少右左折数: {len(frontiers)-1} ")
+    numberOfMinStrokes = len(frontiers) 
+    print(f"最少ストローク数: {len(frontiers)} ")
 
     # 全ノードへの最短距離計算
     shortestLengths_fromGoal = nx.single_source_dijkstra_path_length(Graph, str(goal_node))
@@ -447,7 +447,8 @@ def nMinStrokeShortestPath(
                 'distance': g_value,
                 'stroke_count': stroke_count,
             })
-            # print(f"ゴール発見.results:{results}")
+            print(f"ゴール発見.results:{results}")
+            print(f"stroke_count:{stroke_count},numberOfMinStrokes:{numberOfMinStrokes}")
             # ゴールかつ stroke_count==min_strokes で終了
             if stroke_count == numberOfMinStrokes:
                 print("探索終了,stroke_count == numberOfMinStrokesを満たした.")
@@ -503,7 +504,7 @@ def nMinStrokeShortestPath(
         length = res['distance']
         stroke_count = res['stroke_count']
         print(f"経路 {i+1}: ストローク数 = {stroke_count}, 距離 = {length}  ")
-        print(f"経路座標列:{path}, ノード列長さ= {len(path)}") 
+        # print(f"経路座標列:{path}, ノード列長さ= {len(path)}") 
     # print(f"pop_count:{pop_count}")
     print(f"第n道なり優先最短経路の探索時間: {end_time - start_time:.6f} 秒")
     return paths, lengths

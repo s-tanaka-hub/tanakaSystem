@@ -106,7 +106,7 @@ def minimumStrokesPath():
         # link, length, nodeid_to_nodeCoords, linkid_to_linkCoords,linkid_to_length, linkid_to_nodeids, node_to_linkids, stroke_id, link_ids, strokeid_to_linkids, linkid_to_strokeid, strokeid_to_intersections = db.getRectangleRoadData(y1, x1, y2, x2,n)
         #print(f"link: {link} \n link_id:{link_id}")
         #print(f"strokeid_to_intersectids: {strokeid_to_intersections} ")
-        print(f"dictionary_data: {dictionary_data} ")
+        # print(f"dictionary_data: {dictionary_data} ")
         link = dictionary_data['link']
         length = dictionary_data['length']
         nodeid_to_nodeCoords = dictionary_data['nodeid_to_nodeCoords']
