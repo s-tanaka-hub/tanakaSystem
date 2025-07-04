@@ -198,13 +198,20 @@ def dictionary():
         link, length, nodeid_to_nodeCoords, linkid_to_linkCoords,linkid_to_length, linkid_to_nodeids, node_to_linkids, stroke_id, link_ids, strokeid_to_linkids, linkid_to_strokeid, strokeid_to_intersections = db.getRectangleRoadData(y1, x1, y2, x2,n)
         # --- ここでグラフを構築 ---
         Graph = nx.Graph()
+        skipped_links = []  # 追加できなかったlink_idを記録
         for link_id, coords in linkid_to_linkCoords.items():
-            n1, n2 = coords
-            node1 = str(n1)    # または適宜intやID
-            node2 = str(n2)
-            strokeID = linkid_to_strokeid[link_id]
-            length = linkid_to_length[link_id]
-            Graph.add_edge(node1, node2, weight=length, strokeID=strokeID)
+            try:
+                n1, n2 = coords
+                node1 = str(n1)
+                node2 = str(n2)
+                strokeID = linkid_to_strokeid[link_id]
+                length = linkid_to_length[link_id]
+                Graph.add_edge(node1, node2, weight=length, strokeID=strokeID)
+            except KeyError as e:
+                skipped_links.append(link_id)
+        # 追加できなかったリンクの一覧をprint
+        if skipped_links:
+            print("addできなかったlink_id:", skipped_links)
         
         
 
@@ -274,4 +281,3 @@ def LinkCheck():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0",port=80)
-
